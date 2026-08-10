@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHOSTGRID // Live Cyber Threat Map</title>
+<meta name="description" content="A real-time global cyber threat intelligence map by Ankesh Prajapati.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Boot overlay -->
+<div id="boot" class="boot">
+  <div class="boot-inner">
+    <div class="boot-logo">GHOSTGRID</div>
+    <div class="boot-line" id="bootLine">INITIALIZING SENSOR GRID…</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="bootBar"></div></div>
+  </div>
+</div>
+
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="app">
+
+  <!-- ===== Header ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" src="assets/ghost-logo.gif" alt="GhostGrid logo" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'brand-mark',textContent:'◈'}))">
+      <div class="brand-text">
+        <span class="brand-name">GHOSTGRID</span>
+        <span class="brand-sub">Global Threat Intelligence Grid</span>
+      </div>
+    </div>
+
+    <nav class="topnav">
+      <a href="https://ankesh-prajapati.github.io/Ankesh.onion/" target="_blank" rel="noopener">PORTFOLIO</a>
+      <a href="https://github.com/Ankesh-Prajapati" target="_blank" rel="noopener">GITHUB</a>
+    </nav>
+
+    <div class="status-cluster">
+      <button class="stream-toggle" id="streamToggle" type="button" aria-pressed="false"><span></span> LIVE</button>
+      <div class="status-pill" id="feedStatus">
+        <span class="dot dot-pending"></span> <span id="feedStatusText">CONNECTING…</span>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ===== Left rail ===== -->
+    <aside class="rail rail-left">
+      <section class="panel">
+        <h2 class="panel-title">Attack Types</h2>
+        <ul class="legend" id="legendList">
+          <li data-type="web"><span class="chk" style="--c:var(--c-web)"></span><span class="lbl">Web Attackers</span><span class="legend-pct" id="pct-web">0%</span></li>
+          <li data-type="ddos"><span class="chk" style="--c:var(--c-ddos)"></span><span class="lbl">DDoS Attackers</span><span class="legend-pct" id="pct-ddos">0%</span></li>
+          <li data-type="intrusion"><span class="chk" style="--c:var(--c-intrusion)"></span><span class="lbl">Intruders</span><span class="legend-pct" id="pct-intrusion">0%</span></li>
+          <li data-type="scan"><span class="chk" style="--c:var(--c-scan)"></span><span class="lbl">Scanners</span><span class="legend-pct" id="pct-scan">0%</span></li>
+          <li data-type="anon"><span class="chk" style="--c:var(--c-anon)"></span><span class="lbl">Anonymizers</span><span class="legend-pct" id="pct-anon">0%</span></li>
+        </ul>
+      </section>
+
+      <section class="panel panel-grow">
+        <h2 class="panel-title">Threat Log</h2>
+        <div class="log" id="threatLog" aria-live="polite"></div>
+      </section>
+    </aside>
+
+    <!-- ===== Center map ===== -->
+    <main class="stage">
+      <div class="stage-inner">
+        <div id="mapWrap" class="map-wrap">
+          <svg id="worldSvg" class="world-svg"></svg>
+          <canvas id="arcCanvas" class="arc-canvas"></canvas>
+          <div class="radar-sweep" id="radarSweep"></div>
+          <div class="threat-detail" id="threatDetail" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="timeline" id="timeline">
+          <canvas id="timelineCanvas"></canvas>
+          <div class="timeline-labels">
+            <span id="tlStart">-30m</span>
+            <span>NOW</span>
+          </div>
+        </div>
+        <button class="collapse-btn" id="collapseRails">⤢ TOGGLE PANELS</button>
+      </div>
+    </main>
+
+    <!-- ===== Right rail ===== -->
+    <aside class="rail rail-right">
+      <section class="panel">
+        <div class="panel-head-row">
+          <h2 class="panel-title">Live Cyber Threat Map</h2>
+        </div>
+        <label class="select-wrap">
+          STATISTICS INTERVAL
+          <select id="intervalSelect">
+            <option value="5">5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="360">6 hours</option>
+            <option value="1440">24 hours</option>
+          </select>
+        </label>
+        <div class="time-filter" id="timeFilter" aria-label="Statistics time range">
+          <button type="button" data-min="5">LIVE</button>
+          <button type="button" data-min="30">30M</button>
+          <button type="button" data-min="60" class="active">1H</button>
+          <button type="button" data-min="360">6H</button>
+          <button type="button" data-min="1440">24H</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Top Attackers</h2>
+        <div class="bars" id="topAttackers"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Top Attacked</h2>
+        <div class="bars" id="topAttacked"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Top Attack Vectors</h2>
+        <div class="bars bars-amber" id="topVectors"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Application Violations</h2>
+        <div class="bars bars-red" id="topViolations"></div>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Ankesh Prajapati · GhostGrid Threat Map</span>
+    <span class="footer-sep">·</span>
+    <span id="sourceNote">Source attribution loading…</span>
+    <span class="footer-sep">·</span>
+    <a href="#" id="aboutLink">What is this?</a>
+  </footer>
+
+</div>
+
+<div class="about-modal" id="aboutModal">
+  <div class="about-card">
+    <button class="about-close" id="aboutClose">✕</button>
+    <h3>About GhostGrid</h3>
+    <p>Attacker coordinates are geolocated from live, publicly aggregated blacklist feeds (real IPs currently flagged across dozens of open threat lists). Target coordinates and attack-vector labels are simulated for visualization, since no free public feed exposes real victim telemetry. This is a portfolio / research project — not an operational SOC tool.</p>
+    <p>Built by <a href="https://ankesh-prajapati.github.io/Ankesh.onion/" target="_blank" rel="noopener">Ankesh Prajapati</a>, Security Analyst & Penetration Tester.</p>
+  </div>
+</div>
+
+<script src="js/d3-array.min.js"></script>
+<script src="js/d3-geo.min.js"></script>
+<script src="js/topojson-client.min.js"></script>
+<script src="js/world-data.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/data.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
