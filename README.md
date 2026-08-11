@@ -30,18 +30,17 @@ GhostGrid presents a security-analyst dashboard with:
 
 ## Screenshots
 
-Add screenshots after deployment:
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" alt="GhostGrid dashboard with live threat map" width="100%">
+  <br><em>Live dashboard — global map, attack animation, and stats panels</em>
+</p>
 
-```text
-assets/screenshots/dashboard.png
-assets/screenshots/threat-detail.png
-```
+<p align="center">
+  <img src="assets/screenshots/threat-detail.png" alt="GhostGrid threat detail and IP investigation panel" width="100%">
+  <br><em>Threat detail — deduplicated activity and source-IP investigation</em>
+</p>
 
-Suggested capture:
-
-1. Run the app locally.
-2. Wait for live feed status.
-3. Capture the dashboard with several events and a selected threat.
+> **Note:** these images are committed at `assets/screenshots/dashboard.png` and `assets/screenshots/threat-detail.png`. If they don't render on GitHub, check that the filenames/case match exactly and that the files were committed with `git add` (not just present in a local working copy) — GitHub's file viewer is case-sensitive and won't follow a broken relative path silently, it'll just show a broken-image icon.
 
 ## Technology Stack
 
@@ -57,22 +56,24 @@ Suggested capture:
 
 ## Architecture / Data Flow
 
-```text
-Public blacklist feed (ipsum)
-        |
-        v
-Browser fetches flagged IPs
-        |
-        v
-GeoJS batch geolocation
-        |
-        v
-Raw event objects kept in memory
-        |
-        +--> Canvas map animation
-        +--> Deduplicated threat groups
-        +--> Source-IP activity index
-        +--> Stats, timeline, log, detail panel
+```mermaid
+flowchart TD
+    A["Public blacklist feed<br/>(stamparm/ipsum)"] --> B["Browser fetches<br/>flagged IPs"]
+    B --> C["GeoJS batch<br/>geolocation"]
+    C --> D["Raw event objects<br/>kept in memory"]
+    D --> E["Canvas map<br/>animation"]
+    D --> F["Deduplicated<br/>threat groups"]
+    D --> G["Source-IP<br/>activity index"]
+    D --> H["Stats, timeline,<br/>log, detail panel"]
+
+    style A fill:#1f2937,stroke:#22d3ee,color:#e5e7eb
+    style B fill:#1f2937,stroke:#22d3ee,color:#e5e7eb
+    style C fill:#1f2937,stroke:#22d3ee,color:#e5e7eb
+    style D fill:#111827,stroke:#f87171,color:#e5e7eb
+    style E fill:#1f2937,stroke:#34d399,color:#e5e7eb
+    style F fill:#1f2937,stroke:#34d399,color:#e5e7eb
+    style G fill:#1f2937,stroke:#34d399,color:#e5e7eb
+    style H fill:#1f2937,stroke:#34d399,color:#e5e7eb
 ```
 
 Raw events are preserved in memory for the current browser session. Deduplication and IP history are derived indexes; they do not overwrite or mutate the original event objects.
@@ -85,7 +86,10 @@ threatmap/
 ├── css/
 │   └── style.css
 ├── assets/
-│   └── ghost-logo.gif
+│   ├── ghost-logo.gif
+│   └── screenshots/
+│       ├── dashboard.png
+│       └── threat-detail.png
 ├── js/
 │   ├── app.js
 │   ├── data.js
