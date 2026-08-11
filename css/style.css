@@ -177,7 +177,10 @@ select{ font-family:inherit; }
   padding:14px;
   flex:0 0 auto;
 }
-.panel-grow{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+.panel-grow{
+  flex:0 0 auto; min-height:280px; max-height:420px;
+  display:flex; flex-direction:column;
+}
 .panel-head-row{ display:flex; align-items:center; justify-content:space-between; }
 
 .panel-title{
@@ -219,7 +222,7 @@ select{ font-family:inherit; }
 .legend li.off .chk::after{ display:none; }
 
 /* threat log */
-.log{ flex:1 1 auto; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:6px; font-size:.69rem; padding-right:2px; }
+.log{ flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:6px; font-size:.69rem; padding-right:2px; }
 .log-entry{
   border-left:2px solid var(--c-cyan-dim); padding:7px 9px; background:rgba(255,255,255,.018);
   animation:log-in .3s ease;
@@ -272,6 +275,27 @@ select{ font-family:inherit; }
   background:var(--panel-alt); color:var(--text); border:1px solid var(--line);
   padding:7px 8px; border-radius:2px; font-size:.75rem; letter-spacing:.02em;
 }
+
+/* Reusable small hint text under a panel title */
+.panel-hint{ margin:-4px 0 10px; font-size:.66rem; line-height:1.5; color:var(--text-faint); }
+
+/* CVE / KEV watch list */
+.kev-badge{
+  font-size:.58rem; letter-spacing:.1em; color:var(--c-scan); border:1px solid var(--c-scan);
+  padding:2px 7px; border-radius:9px; align-self:flex-start;
+}
+.kev-list{ display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; }
+.kev-loading, .kev-error{ font-size:.7rem; color:var(--text-faint); }
+.kev-entry{
+  border-left:2px solid var(--c-ddos); padding:6px 8px; background:rgba(255,255,255,.02);
+  font-size:.68rem; line-height:1.45;
+}
+.kev-entry a{ color:var(--text); font-weight:600; }
+.kev-entry a:hover{ color:var(--c-cyan); }
+.kev-entry .kev-meta{ color:var(--text-faint); font-size:.63rem; margin-top:2px; }
+.kev-entry .kev-ransom{
+  display:inline-block; margin-left:6px; color:var(--c-web); font-size:.6rem; letter-spacing:.05em;
+}
 .time-filter{
   display:flex; gap:4px; margin-top:10px;
 }
@@ -290,6 +314,39 @@ select{ font-family:inherit; }
 .stage{ flex:1 1 auto; display:flex; flex-direction:column; min-width:0; }
 .stage-inner{ flex:1 1 auto; position:relative; min-height:0; }
 .map-wrap{ position:absolute; inset:0; }
+
+/* ============================================================
+   Depth / "3D console" treatment
+   Purely decorative layers stacked in front of the map — none of
+   this touches the SVG/canvas coordinate space, so pin placement
+   and click-to-select accuracy are unaffected.
+   ============================================================ */
+.map-depth-dome{
+  position:absolute; inset:0; pointer-events:none; z-index:5;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% -10%, rgba(120,190,255,.10), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(0,0,0,.55), transparent 60%);
+}
+.map-depth-vignette{
+  position:absolute; inset:0; pointer-events:none; z-index:5;
+  box-shadow:
+    inset 0 0 90px 10px rgba(0,0,0,.55),
+    inset 0 2px 0 rgba(140,210,255,.12);
+  border-radius:2px;
+}
+.map-depth-floor{
+  position:absolute; left:0; right:0; bottom:0; height:22%; pointer-events:none; z-index:4;
+  background:linear-gradient(to top, rgba(4,9,16,.65), transparent);
+}
+.hud-corner{
+  position:absolute; width:26px; height:26px; pointer-events:none; z-index:6;
+  border:1px solid var(--c-cyan); opacity:.55;
+}
+.hud-corner.tl{ top:10px; left:10px; border-right:none; border-bottom:none; }
+.hud-corner.tr{ top:10px; right:10px; border-left:none; border-bottom:none; }
+.hud-corner.bl{ bottom:10px; left:10px; border-right:none; border-top:none; }
+.hud-corner.br{ bottom:10px; right:10px; border-left:none; border-top:none; }
+
 .world-svg{ position:absolute; inset:0; width:100%; height:100%; }
 .world-svg path.country{
   fill:rgba(20,45,72,.55);

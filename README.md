@@ -23,6 +23,7 @@ GhostGrid presents a security-analyst dashboard with:
 - **Threat deduplication:** groups repeated events by source IP, target, attack type, and vector
 - **Threat history:** first seen, last seen, total events, target countries, attack vectors, and recent chronological events
 - **IP investigation:** previous targets, vectors, countries involved, event count, and first/last seen for a selected source IP
+- **CVE watch (CISA KEV):** the 10 most recently added entries from CISA's official Known Exploited Vulnerabilities catalog, pulled from CISA's own GitHub mirror — real, authoritative, actively-exploited CVEs, not a mock
 - **Live / paused stream:** pause incoming UI events without generating or replaying fake history
 - **Time filters:** `LIVE`, `30M`, `1H`, `6H`, `24H` over events collected in the current browser session
 - **Static deployment:** works from GitHub Pages or any static HTTP server

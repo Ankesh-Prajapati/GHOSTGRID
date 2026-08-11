@@ -485,6 +485,26 @@
     requestAnimationFrame(drawTimeline);
   }
 
+  /* ---------------- CVE / KEV watch ---------------- */
+  function renderKev(data){
+    const badge = document.getElementById('kevBadge');
+    const list = document.getElementById('kevList');
+    if(!data.ok || !data.entries || !data.entries.length){
+      badge.textContent = 'OFFLINE';
+      badge.style.color = 'var(--text-faint)'; badge.style.borderColor = 'var(--text-faint)';
+      list.innerHTML = '<div class="kev-error">CISA KEV feed unavailable right now.</div>';
+      return;
+    }
+    badge.textContent = 'LIVE';
+    badge.style.color = ''; badge.style.borderColor = '';
+    list.innerHTML = data.entries.slice(0,10).map(e => `
+      <div class="kev-entry">
+        <a href="${e.url}" target="_blank" rel="noopener">${escapeHtml(e.cveId)}</a> — ${escapeHtml(e.name)}
+        ${e.ransomware ? '<span class="kev-ransom">⚠ RANSOMWARE</span>' : ''}
+        <div class="kev-meta">${escapeHtml(e.vendor)} / ${escapeHtml(e.product)} · added ${escapeHtml(e.dateAdded)}</div>
+      </div>`).join('');
+  }
+
   /* ---------------- misc UI wiring ---------------- */
   function initMisc(){
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -554,6 +574,13 @@
       Sentinel.data.start();
     }catch(err){
       console.error('[app] data layer failed to start', err);
+    }
+
+    try{
+      Sentinel.kev.onUpdate(renderKev);
+      Sentinel.kev.start();
+    }catch(err){
+      console.error('[app] KEV feed failed to start', err);
     }
 
     setInterval(renderStats, 1500);

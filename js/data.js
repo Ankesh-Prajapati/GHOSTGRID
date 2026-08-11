@@ -77,10 +77,11 @@ window.Sentinel = window.Sentinel || {};
     const rows = text.split('\n')
       .filter(l => l && !l.startsWith('#'))
       .map(l => { const [ip, score] = l.trim().split('\t'); return {ip, score:+score||1}; })
-      .filter(r => r.ip && r.score >= 3); // reasonably corroborated across feeds
-    // Prioritize higher-confidence entries, then take a broad, shuffled sample
-    rows.sort((a,b)=> b.score - a.score);
-    const top = rows.slice(0, 800);
+      .filter(r => r.ip);
+
+    const corroborated = rows.filter(r => r.score >= 3); // reasonably corroborated across feeds
+    corroborated.sort((a,b)=> b.score - a.score);
+    const top = corroborated.slice(0, 800);
     shuffle(top);
     return top.slice(0, 260);
   }

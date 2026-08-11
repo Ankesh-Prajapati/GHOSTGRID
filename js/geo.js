@@ -8,8 +8,8 @@ window.Sentinel = window.Sentinel || {};
 
 (function(){
   const WORLD_ATLAS_URLS = [ // last-resort mirrors only; embedded data is the primary source
-    'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-    'https://unpkg.com/world-atlas@2/countries-110m.json',
+    'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json',
+    'https://unpkg.com/world-atlas@2/countries-50m.json',
   ];
 
   let projection, pathGen, svgEl, width = 0, height = 0;
