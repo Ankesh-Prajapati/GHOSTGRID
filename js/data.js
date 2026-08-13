@@ -101,10 +101,16 @@ window.Sentinel = window.Sentinel || {};
     return batch.map(b=>{
       const g = byIp[b.ip];
       if(!g || !g.latitude || !g.longitude) return null;
+      const lat = parseFloat(g.latitude), lon = parseFloat(g.longitude);
+      // geojs occasionally returns a truthy-but-non-numeric lat/lon (e.g. "" -> NaN
+      // slipping past the guard above). A NaN coordinate downstream feeds
+      // ctx.createLinearGradient() a non-finite value, which throws and permanently
+      // kills the rAF draw loop in map.js. Reject it here instead.
+      if(!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
       return {
         ip: b.ip, score: b.score,
         country: g.country || 'Unknown', code: (g.country_code||'').toLowerCase(),
-        lat: parseFloat(g.latitude), lon: parseFloat(g.longitude),
+        lat, lon,
       };
     }).filter(Boolean);
   }

@@ -52,6 +52,10 @@ window.Sentinel = window.Sentinel || {};
 
   function addEvent(ev){
     if(!Sentinel.geo || paused) return;
+    // Guard against any bad/NaN coordinates reaching the canvas — a single
+    // non-finite value passed to ctx.createLinearGradient()/arc() throws and
+    // would otherwise kill the requestAnimationFrame loop for good.
+    if(![ev.srcLon, ev.srcLat, ev.dstLon, ev.dstLat].every(Number.isFinite)) return;
     arcs.push({ ev, start: performance.now(), color: COLORS[ev.type] || '#29e2ff' });
     markers.push({ev, kind:'src', lon:ev.srcLon, lat:ev.srcLat, start:performance.now()});
     markers.push({ev, kind:'dst', lon:ev.dstLon, lat:ev.dstLat, start:performance.now()});
@@ -66,6 +70,17 @@ window.Sentinel = window.Sentinel || {};
   }
 
   function draw(now){
+    try{
+      drawFrame(now);
+    }catch(err){
+      // Never let a single bad frame (e.g. a stray non-finite coordinate)
+      // permanently stop the animation — log it and keep the rAF chain alive.
+      console.warn('[map] draw frame failed, skipping', err);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function drawFrame(now){
     const {width, height} = Sentinel.geo ? Sentinel.geo.getSize() : {width:canvas.clientWidth,height:canvas.clientHeight};
     ctx.clearRect(0,0,width,height);
 
@@ -179,8 +194,6 @@ window.Sentinel = window.Sentinel || {};
       const alpha = t < .12 ? t / .12 : 1 - Math.max(0, (t - .72) / .28);
       drawLabel(x, y, l.text, l.color, Math.max(0, Math.min(1, alpha)));
     }
-
-    requestAnimationFrame(draw);
   }
 
   function drawLabel(x, y, text, color, alpha){

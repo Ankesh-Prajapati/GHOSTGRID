@@ -17,6 +17,15 @@
   let history = [];               // all events, newest last
   const groupedThreats = new Map();
   const ipActivity = new Map();
+  // Unlike the visible DOM log (capped at 60 rows) and `history` (capped at
+  // 4000), these two maps used to grow without limit for the life of the tab
+  // — every event ever seen stayed in memory, slowing down long-running
+  // sessions. Cap per-entry arrays and evict the oldest entries once the
+  // maps get large, same idea as the log/history caps above.
+  const MAX_EVENTS_PER_GROUP = 200;   // summarizeEvents() only needs recent samples
+  const MAX_EVENTS_PER_IP = 200;      // detail view only needs recent samples
+  const MAX_GROUPS = 500;
+  const MAX_TRACKED_IPS = 500;
   let activeTypes = new Set(Object.keys(COLORS));
   let intervalMin = 60;
   let streamPaused = false;
@@ -227,15 +236,27 @@
         row: null,
       };
       groupedThreats.set(key, group);
+      if(groupedThreats.size > MAX_GROUPS){
+        // Map preserves insertion order; the first key is the oldest group.
+        groupedThreats.delete(groupedThreats.keys().next().value);
+      }
     }
     group.count += 1;
     group.firstSeen = Math.min(group.firstSeen, ts);
     group.lastSeen = Math.max(group.lastSeen, ts);
     group.events.push(ev);
+    if(group.events.length > MAX_EVENTS_PER_GROUP) group.events.shift();
 
     const ip = safe(ev.ip);
-    if(!ipActivity.has(ip)) ipActivity.set(ip, []);
-    ipActivity.get(ip).push(ev);
+    if(!ipActivity.has(ip)){
+      ipActivity.set(ip, []);
+      if(ipActivity.size > MAX_TRACKED_IPS){
+        ipActivity.delete(ipActivity.keys().next().value);
+      }
+    }
+    const activity = ipActivity.get(ip);
+    activity.push(ev);
+    if(activity.length > MAX_EVENTS_PER_IP) activity.shift();
     return group;
   }
 
